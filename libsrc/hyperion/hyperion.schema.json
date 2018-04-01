@@ -19,6 +19,10 @@
 		{
 			"$ref": "schema-color.json"
 		},
+		"colorCorrection" :
+		{
+			"$ref": "schema-color-correction.json"
+		},
 		"smoothing":
 		{
 			"$ref": "schema-smoothing.json"

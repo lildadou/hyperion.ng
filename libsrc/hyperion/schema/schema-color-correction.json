@@ -1,0 +1,132 @@
+{
+  "type":"object",
+  "properties": {
+    "brightness": { "$ref": "#/definitions/offset9" },
+    "contrast": { "$ref": "#/definitions/offset9" },
+    "inputRangeMapping": {
+      "type": "string",
+      "enum": ["0-255", "16-235"],
+      "default": "0-255"
+    },
+    "3dLut": {
+      "oneOf": [
+        { "$ref": "#/definitions/3dArrayLut" }
+      ]
+    },
+
+    "inputGamma": {
+      "allOf": [
+        { "$ref": "#/definitions/encodingGammaStandards" },
+        { "default": "Rec.709" }
+      ]
+    },
+    "colorCorrectionMatrix": { "$ref": "#/definitions/colorCorrectionMatrix" },
+    "outputGamma": {
+      "oneOf": [
+        { "$ref": "#/definitions/encodingGammaStandards" },
+        { "$ref": "#/definitions/displayingGamma/standards" },
+        { "$ref": "#/definitions/displayingGamma/specials" },
+        { "$ref": "#/definitions/1dArrayLut" }
+      ],
+      "default": "none"
+    }
+  },
+  "additionalProperties": false,
+  "dependencies": {
+    "colorCorrectionMatrix": ["inputGamma"]
+  },
+
+  "definitions": {
+    "rgb": {
+      "type" : "array",
+      "format" : "colorpicker",
+      "items" : { "$ref": "#/definitions/offset8" },
+      "minItems" : 3,
+      "maxItems" : 3
+    },
+    "offset8": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "offset9": {
+      "type": "integer",
+      "minimum": -255,
+      "maximum": 255,
+      "default": 0
+    },
+
+    "1dArrayLut": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/rgb" },
+      "minItems": 255,
+      "maxItems": 255
+    },
+    "3dArrayLut": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 65,
+      "$comment": "redIndex",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 65,
+        "$comment": "greenIndex",
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 65,
+          "items": { "$ref": "#/definitions/rgb" }
+        }
+      },
+      // @formatter:off
+      "default":
+      [
+        [
+          [ [0,0,0],[0,0,255] ],
+          [ [0,255,0],[0,255,255] ]
+        ], [
+          [ [255,0,0],[255,0,255] ],
+          [ [255,255,0],[255,255,255] ]
+        ]
+      ]
+      // @formatter:on
+    },
+    "colorCorrectionMatrix": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/rgb" },
+      "minItems": 3,
+      "maxItems": 3,
+      "default": [
+        [255,   0,   0],
+        [  0, 255,   0],
+        [  0,   0, 255]]
+    },
+
+    "encodingGammaStandards": {
+      "type": "string",
+      "enum": ["sRGB", "Rec.601", "Rec.709", "Rec.2020"]
+    },
+    "displayingGamma" : {
+      "standards": {
+        "type": "string",
+        "enum": ["sRGB", "BT.1886"]
+      },
+      "specials": {
+        "oneOf": [{
+            "type": "string",
+            "enum": ["none"]
+          }, {
+            "type": "object",
+            "properties": {
+              "method": { "type": "string", "enum": ["purePow"] },
+              "param": { "type": "number", "default": 1.5 }
+            },
+            "required": ["method", "param"],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  }
+}
